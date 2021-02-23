@@ -19,7 +19,7 @@ export class StaticStack extends cdk.Stack {
 
         // Route53 DNS
         const zone = new route53.PublicHostedZone(this, 'HostedZone', {
-            zoneName: props!.domain.domainName!
+            zoneName: siteDomain
         });
 
         // Content bucket
