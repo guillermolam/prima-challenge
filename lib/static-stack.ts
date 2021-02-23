@@ -18,21 +18,17 @@ export class StaticStack extends cdk.Stack {
         new cdk.CfnOutput(this, "Site", { value: "https://" + siteDomain });
 
         // Route53 DNS
-        const zone = new route53.PublicHostedZone(this, 'HostedZone', {
-            zoneName: siteDomain
+        const zone = route53.HostedZone.fromLookup(this, 'baseZone', {
+            domainName: props!.domain.siteSubDomain
         });
 
-        // Content bucket
+        // S3 Content bucket
         const siteBucket = new s3.Bucket(this, "SiteBucket", {
             bucketName: siteDomain,
             websiteIndexDocument: "index.html",
             websiteErrorDocument: "error.html",
             publicReadAccess: true,
-
-            // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
-            // the new bucket, and it will remain in your account until manually deleted. By setting the policy to
-            // DESTROY, cdk destroy will attempt to delete the bucket, but will error if the bucket is not empty.
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            removalPolicy: cdk.RemovalPolicy.DESTROY
         });
         new cdk.CfnOutput(this, "Bucket", { value: siteBucket.bucketName });
 
@@ -41,7 +37,7 @@ export class StaticStack extends cdk.Stack {
             this,
             "SiteCertificate",
             {
-                domainName: siteDomain,
+                domainName: props!.domain.domainName,
                 hostedZone: zone,
                 region: props!.env.region,
                 validation: CertificateValidation.fromDns(zone)
