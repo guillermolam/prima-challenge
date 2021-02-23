@@ -22,6 +22,14 @@ export class StaticStack extends cdk.Stack {
             domainName: props!.domain.siteSubDomain
         });
 
+        //Add the Subdomain to Route53
+        const cName = new route53.CnameRecord(this, 'test.baseZone', {
+            zone: zone,
+            recordName: 'example',
+            domainName: siteDomain
+        });
+
+
         // S3 Content bucket
         const siteBucket = new s3.Bucket(this, "SiteBucket", {
             bucketName: siteDomain,
