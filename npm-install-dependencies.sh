@@ -1,4 +1,6 @@
 chmod -R 755 .
+npm i
+cdk bootstrap aws://401280197872/eu-west-3
 
 ###
 # npm i aws-cdk
