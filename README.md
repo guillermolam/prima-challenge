@@ -30,4 +30,5 @@ What issues can you identify in the given site? What types of improvements would
  * `npm run deploy --all`     deploy this stack to your default AWS account/region
  * `npm run deploy-static`     deploy this stack to your default AWS account/region
  * `npm run deploy-dynamic`     deploy this stack to your default AWS account/region
- * `npm run destroy`    destroy aws infra
+ * `npm run destroy --all`    destroy aws infra
+ * `aws cloudformation list-stacks`

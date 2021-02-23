@@ -13,7 +13,9 @@
     "deploy": "cdk deploy --all",
     "deploy-static": "cdk deploy PrismaCapacitycStaticSite",
     "deploy-dynamic": "cdk deploy PrismaCapacityDynamicSite",
-    "destroy": "cdk destroy",
+    "destroy": "cdk destroy --all",
+    "destroy-static": "cdk destroy PrismaCapacitycStaticSite",
+    "destroy-dynamic": "cdk destroy PrismaCapacityDynamicSite",
     "synth": "cdk synth",
     "start": "next start"
   },
