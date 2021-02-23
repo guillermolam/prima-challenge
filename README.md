@@ -1,15 +1,31 @@
-# Welcome to your CDK TypeScript project!
+# Challenge 3: Website Deployment
 
-You should explore the contents of this project. It demonstrates a CDK app with an instance of a stack (`PrismaStack`)
-which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
+Welcome to Challenge 3.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+This project was bootstrapped with [Create Next App](https://github.com/segmentio/create-next-app).
+
+## Task 1 
+
+Given this project deploy it to AWS in an automated and reproducible fashion. The website should be reachable from all over the world.
+ 
+## Task 2 
+
+Restrict access to the site by using mechanisms that can be adapted programmatically.
+
+## Task 3 
+
+Deploy the site using at least 2 technology stacks. Make sure that both types of deployment can be reproduced in an automated fashion.
+
+## Task 4 
+
+What issues can you identify in the given site? What types of improvements would you suggest?
+
 
 ## Useful commands
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+ * `npm run build`      compile typescript to js
+ * `npm run watch`      watch for changes and compile
+ * `npm run test`       perform the jest unit tests
+ * `npm run synth`      emits the synthesized CloudFormation template
+ * `npm run deploy`     deploy this stack to your default AWS account/region
+ * `npm run destroy`    destroy aws infra
