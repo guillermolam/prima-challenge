@@ -20,10 +20,6 @@ export class StaticStack extends cdk.Stack {
         const zone = new route53.PublicHostedZone(this, 'HostedZone', {
             zoneName: props!.domain.domainName!
         });
-        new acm.Certificate(this, 'Certificate', {
-            domainName: siteDomain,
-            validation: acm.CertificateValidation.fromDns(zone),
-        });
 
         // Content bucket
         const siteBucket = new s3.Bucket(this, "SiteBucket", {
