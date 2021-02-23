@@ -7,6 +7,7 @@ import * as acm from '@aws-cdk/aws-certificatemanager'
 import * as targets from '@aws-cdk/aws-route53-targets/lib'
 import { StaticStackProps } from './multi-stack-definition';
 import * as path from 'path'
+import { CertificateValidation } from '@aws-cdk/aws-certificatemanager';
 
 /** STATIC **/
 export class StaticStack extends cdk.Stack {
@@ -43,6 +44,7 @@ export class StaticStack extends cdk.Stack {
                 domainName: siteDomain,
                 hostedZone: zone,
                 region: props!.env.region,
+                validation: CertificateValidation.fromDns(zone)
             }
         ).certificateArn;
         new cdk.CfnOutput(this, "Certificate", { value: certificateArn });
