@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "next",
     "build": "tsc && next build",
+    "bootstrap": "cdk bootstrap aws://401280197872/eu-west-3",
     "watch": "tsc -w",
     "cdk": "cdk",
-    "deploy": "cdk deploy",
+    "deploy": "cdk deploy --all",
+    "deploy-static": "cdk deploy PrismaCapacitycStaticSite",
+    "deploy-dynamic": "cdk deploy PrismaCapacityDynamicSite",
     "destroy": "cdk destroy",
     "synth": "cdk synth",
     "start": "next start"

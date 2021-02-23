@@ -27,5 +27,7 @@ What issues can you identify in the given site? What types of improvements would
  * `npm run watch`      watch for changes and compile
  * `npm run test`       perform the jest unit tests
  * `npm run synth`      emits the synthesized CloudFormation template
- * `npm run deploy`     deploy this stack to your default AWS account/region
+ * `npm run deploy --all`     deploy this stack to your default AWS account/region
+ * `npm run deploy PrismaCapacityDynamicSite`     deploy this stack to your default AWS account/region
+ * `npm run deploy PrismaCapacitycStaticSite`     deploy this stack to your default AWS account/region
  * `npm run destroy`    destroy aws infra
