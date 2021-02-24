@@ -37,15 +37,16 @@ export class DynamicStack extends cdk.Stack {
       ]
     });
 
-    const mySG = new ec2.SecurityGroup(this, 'ssh-and-internet-access', {
+    const securityGroup = new ec2.SecurityGroup(this, 'ssh-and-internet-access', {
       vpc: vpc,
       allowAllOutbound: true,
       description: 'SSH, HTTP and HTTPS access'
     });
-
-    mySG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH from anywhere');
-    mySG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Ingress');
-    mySG.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'HTTPS Ingress');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22), 'SSH from anywhere');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Ingress');
+    securityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'HTTPS Ingress');
+    securityGroup.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Egress');
+    securityGroup.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'HTTPS Egress');
 
     // define the IAM role that will allow the EC2 instance to communicate with SSM 
     const role = new Role(this, props!.role, {
@@ -67,7 +68,7 @@ export class DynamicStack extends cdk.Stack {
     const instance = new Ec2(this, 'NewsBlogInstance', {
       image: new AmazonLinuxImage(),
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
-      subnet: privateSubnet0,
+      subnet: vpc.privateSubnets[0],
       role: role,
       userData: ssmaUserData
     })
