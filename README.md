@@ -7,6 +7,11 @@ This project was bootstrapped with [Create Next App](https://github.com/segmenti
 ## Task 1 
 
 Given this project deploy it to AWS in an automated and reproducible fashion. The website should be reachable from all over the world.
+
+URL : http://guillermolam.prisma.capacity.com.s3-website.eu-west-3.amazonaws.com/
+- ```cd``` inside of the folder and run ```pulumi_config.sh```
+- ```npm run pulumi-deploy-static```
+- 
  
 ## Task 2 
 
@@ -24,11 +29,13 @@ What issues can you identify in the given site? What types of improvements would
 2) No server side rendering 
 3) Does not use AMP to optimize rendering
 4) Doesn't use Typescript which is less error prone
-
-5) Requests to "https://haveibeenpwned.com/api/v2/breaches"
-6) CloudFront distribution Origin Access Identity leveraging origin access restriction to the bucket and allowing only access through CDN
-7) Stronger Cipher suites
-8) Encrypt data at rest
-9) No DDos mitigation using AWS Shield
-10) Monitoring 
-11) Add authenticationLogin page with Cognito utilizing 
+5) 
+6) Requests to "https://haveibeenpwned.com/api/v2/breaches" should handle all possible error scenarios
+7) CloudFront distribution Origin Access Identity leveraging origin access restriction to the bucket and allowing only access through CDN
+8) Signed URL and Signed Cookies
+9) proper error handling for downstream requests
+10) Stronger Cipher suites
+11) Encrypt data at rest
+12) No DDos mitigation using AWS Shield
+13) Monitoring 
+14) Add authenticationLogin page with Cognito utilizing 

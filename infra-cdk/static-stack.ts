@@ -17,9 +17,9 @@ export class StaticStack extends cdk.Stack {
 
         // Route53 DNS
         // The name of the record  must match a custom domain name for your API, such as api.example.com.
-        const zone = new route53.PublicHostedZone(this, 'HostedZone', {
-            zoneName: props!.domain.domainName
-        });
+        // const zone = new route53.PublicHostedZone(this, 'HostedZone', {
+        //     zoneName: props!.domain.domainName
+        // });
 
         // S3 Content bucket
         const siteBucket = new s3.Bucket(this, "SiteBucket", {
@@ -49,9 +49,6 @@ export class StaticStack extends cdk.Stack {
                 defaultRootObject: 'index.html',
                 originConfigs: [
                     {
-                        s3OriginSource: {
-                            s3BucketSource: siteBucket
-                        },
                         customOriginSource: {
                             domainName: siteBucket.bucketWebsiteDomainName,
                             originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
@@ -71,8 +68,8 @@ export class StaticStack extends cdk.Stack {
         new s3deploy.BucketDeployment(this, "DeployWithInvalidation", {
             sources: [s3deploy.Source.asset(path.resolve(__dirname, '../out'))],
             destinationBucket: siteBucket,
-            distribution,
-            distributionPaths: ["/*"],
+           distribution,
+           distributionPaths: ["/*"],
         });
     }
 }

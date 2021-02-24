@@ -19,17 +19,17 @@ const staticSite = new StaticStack(app, "PrismaCapacitycStaticSite", {
 })
 
 /** DYNAMIC / VPC / EC2 **/
-const dynamicSite = new DynamicStack(app, "PrismaCapacityDynamicSite", {
-    role: 'PrismaAdminRole',
-    env: {
-        region: 'eu-west-3',
-        account: '401280197872'
-    },
-    domain: {
-        domainName: 'prismacapacity.com',
-        siteSubDomain: 'guillermolam-dynamic'
-    }
-})
+// const dynamicSite = new DynamicStack(app, "PrismaCapacityDynamicSite", {
+//     role: 'PrismaAdminRole',
+//     env: {
+//         region: 'eu-west-3',
+//         account: '401280197872'
+//     },
+//     domain: {
+//         domainName: 'prismacapacity.com',
+//         siteSubDomain: 'guillermolam-dynamic'
+//     }
+//})
 
 cdk.Tags.of(staticSite).add("Project", "Prisma Capaity Assignment for Guillermo Lam")
 cdk.Tags.of(staticSite).add("Author", "Guillermo Lam")

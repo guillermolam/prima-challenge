@@ -6,16 +6,10 @@ script:
   - ./scripts/npm-install-dependencies.sh
 jobs:
   include:
-    - stage: test
-      script: npm test
     - stage: build
       script: npm run build
     - stage: deploy-static
-      if: branch = master
       script: npm run pulumi-deploy-static
-    - stage: deploy-dynamic
-      if: branch = master
-      script: npm run pulumi-deploy-dynamic
 stages:
   - name: test
     if: type = pull_request OR type = push
