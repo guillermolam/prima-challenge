@@ -23,8 +23,8 @@ const contentBucket = new aws.s3.Bucket("contentBucket",
         // Configure S3 to serve bucket contents as a website. This way S3 will automatically convert
         // requests for "foo/" to "foo/index.html".
         website: {
-            indexDocument: "server/index.html",
-            errorDocument: "server/error.html",
+            indexDocument: "index.html",
+            errorDocument: "404.html",
         },
     });
 
@@ -97,7 +97,7 @@ const distributionArgs: aws.cloudfront.DistributionArgs = {
         },
     ],
 
-    defaultRootObject: "server/index.html",
+    defaultRootObject: "index.html",
 
     // A CloudFront distribution can configure different cache behaviors based on the request path.
     // Here we just specify a single, default cache behavior which is just read-only requests to S3.
@@ -125,7 +125,7 @@ const distributionArgs: aws.cloudfront.DistributionArgs = {
     // You can customize error responses. When CloudFront receives an error from the origin (e.g. S3 or some other
     // web service) it can return a different error code, and return the response for a different resource.
     customErrorResponses: [
-        { errorCode: 404, responseCode: 404, responsePagePath: "/server/404.html" },
+        { errorCode: 404, responseCode: 404, responsePagePath: "/404.html" },
     ],
 
     restrictions: {
