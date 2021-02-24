@@ -1,7 +1,7 @@
 import { expect as expectCDK, haveResource } from '@aws-cdk/assert';
 import * as cdk from '@aws-cdk/core';
-import { DynamicStack } from '../lib/dynamic-stack';
-import { StaticStack } from '../lib/static-stack';
+import { DynamicStack } from '../infra-cdk/dynamic-stack';
+import { StaticStack } from '../infra-cdk/static-stack';
 
 
 test('S3 Created', () => {
@@ -12,12 +12,4 @@ test('S3 Created', () => {
     expectCDK(stack).to(haveResource("AWS::S3",{ }));
 });
 
-test('VPC Created', () => {
-  const app = new cdk.App();
-  // WHEN
-  const stack = new DynamicStack(app, 'DynamicStack');
-  // THEN
-  expectCDK(stack).to(haveResource('AWS::ElasticLoadBalancingV2::LoadBalancer', {
-    Scheme: "internet-facing"
-  }));
 });

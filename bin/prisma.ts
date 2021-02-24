@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
-import { StaticStack } from '../lib/static-stack';
-import { DynamicStack } from '../lib/dynamic-stack';
+import { StaticStack } from '../infra-cdk/static-stack';
+import { DynamicStack } from '../infra-cdk/dynamic-stack';
 
 const app = new cdk.App()
 

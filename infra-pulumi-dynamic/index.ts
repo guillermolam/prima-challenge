@@ -50,9 +50,6 @@ const key = new aws.ec2.KeyPair('key', {
 });
 
 const sshGroup = new aws.ec2.SecurityGroup('ssh-access', {
-    egress: [
-        { protocol: 'tcp', fromPort: 22, toPort: 22, cidrBlocks: ['0.0.0.0/0'] }
-    ],
     ingress: [
         { protocol: 'tcp', fromPort: 22, toPort: 22, cidrBlocks: ['0.0.0.0/0'] }
     ],
@@ -91,7 +88,8 @@ const ami = pulumi.output(aws.getAmi({
 const userData = // <-- ADD THIS DEFINITION
     `#!/bin/bash
 echo "Hello, World!" > index.html
-nohup python -m SimpleHTTPServer 80 &`;
+nohup python -m SimpleHTTPServer 443 &`;
+
 const size = "t2.micro";     // t2.micro is available in the AWS free tier
 const server = new aws.ec2.Instance('prisma-webserver', {
     instanceType: size,

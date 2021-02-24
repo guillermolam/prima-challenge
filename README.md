@@ -32,3 +32,4 @@ What issues can you identify in the given site? What types of improvements would
  * `npm run deploy-dynamic`     deploy this stack to your default AWS account/region
  * `npm run destroy --all`    destroy aws infra
  * `aws cloudformation list-stacks`     list all stacks in cloudformation
+ * `puumi stack output hostname`    list all hostnames
