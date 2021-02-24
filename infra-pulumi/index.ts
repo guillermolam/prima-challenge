@@ -1,6 +1,5 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
-import * as dotenv from "dotenv"
 
 const stackConfig = new pulumi.Config("prisma-website");
 const vpc = new aws.ec2.Vpc('vpc-59a45931', {
@@ -46,7 +45,13 @@ const sshGroup = new aws.ec2.SecurityGroup('ssh-access', {
 });
 
 const publicKey = stackConfig.requireSecret("publicKey");
-const key = new aws.ec2.KeyPair('key', {publicKey});
+const key = new aws.ec2.KeyPair('key', {
+    keyName: "keypair-pulumi",
+    publicKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDsOGFj1K9BwwGEBbP6oIJWhQlziVN+87nWY0JtuM9FAYHL0Nxj5FwkqljnP+IJRYfqOBK3Q0BIgq90akgN2Po9S3+C8ILCFcTWSDmYsVsDkdS96BXTXNFmH0YX6S7zqsOpvtbvURZTO56fNc+2TU8g/kPt7pmr/9XAj/5PCSj2txPmTmBU5kqdiXWlWJxdgUIWpE/3tPX2iWKETu16s0RLriZbHVp8w0pr9GYq5483bmJVzu9F6eQ74ThVaaUWfK9V9Ds5lyI9g3jKQC1bgi1ISxVyWpf/OkVJvPHEWri6AVFFWrlwRNKl9WLsRPuyJ+iHLku7nIa2a0bDJcYDevZb guillermolammartin@Guille.local",
+    tags: {
+        name : "keypair-pulumi-ec2"
+    }
+});
 
 const internetGroup = new aws.ec2.SecurityGroup('internet-access', {
     egress: [

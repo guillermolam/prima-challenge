@@ -1,6 +1,3 @@
 name: prisma-challenge
 runtime: nodejs
 description: Primsa infra as code for their interview process
-config:
-  pathToWebsiteContents: '../.next'
-  targetDomain: guillermolam.prismacapacity.eu

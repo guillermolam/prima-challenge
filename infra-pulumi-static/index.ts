@@ -3,19 +3,16 @@ import * as pulumi from "@pulumi/pulumi";
 import * as mime from 'mime'
 import * as fs from "fs";
 import * as path from "path";
-import * as props from "../cdk.json"
-
 
 // Load the Pulumi program configuration. These act as the "parameters" to the Pulumi program,
 // so that different Pulumi Stacks can be brought up using the same code.
 const stackConfig = new pulumi.Config("prisma-website");
+
 const config = {
     // pathToWebsiteContents is a relativepath to the website's contents.
-    pathToWebsiteContents: '../.next',
+    pathToWebsiteContents: '../out',
     // targetDomain is the domain/host to serve content at.
-    targetDomain: props.domain,
-    // (Optional) ACM certificate ARN for the target domain; must be in the us-east-1 region. If omitted, an ACM certificate will be created.
-    certificateArn: stackConfig.get("certificateArn"),
+    targetDomain: "guillermolam.prisma.capacity.com",
 };
 
 // contentBucket is the S3 bucket that the website's contents will be stored in.
@@ -26,8 +23,8 @@ const contentBucket = new aws.s3.Bucket("contentBucket",
         // Configure S3 to serve bucket contents as a website. This way S3 will automatically convert
         // requests for "foo/" to "foo/index.html".
         website: {
-            indexDocument: "index.html",
-            errorDocument: "error.html",
+            indexDocument: "server/index.html",
+            errorDocument: "server/error.html",
         },
     });
 
@@ -77,55 +74,13 @@ const logsBucket = new aws.s3.Bucket("requestLogs",
     });
 
 const ttl = 60 * 10;
-let certificateArn: pulumi.Input<string> = config.certificateArn!;
 
-/**
- * Only provision a certificate (and related resources) if a certificateArn is _not_ provided via configuration.
- */
-if (config.certificateArn === undefined) {
-
-    const region = new aws.Provider("west", {
-        profile: aws.config.profile,
-        region: "eu-west-3", // Per AWS, ACM certificate must be in the us-east-1 region.
-    });
-
-    const certificate = new aws.acm.Certificate("certificate", {
-        domainName: config.targetDomain,
-        validationMethod: "DNS",
-    }, { provider: region });
-
-    const domainParts = getDomainAndSubdomain(config.targetDomain);
-    const hostedZoneId = aws.route53.getZone({ name: domainParts.parentDomain }, { async: true }).then(zone => zone.zoneId);
-
-
-    const certificateValidationDomain = new aws.route53.Record(`${config.targetDomain}-validation`, {
-        name: certificate.domainValidationOptions[0].resourceRecordName,
-        zoneId: hostedZoneId,
-        type: certificate.domainValidationOptions[0].resourceRecordType,
-        records: [certificate.domainValidationOptions[0].resourceRecordValue],
-        ttl: ttl,
-    });
-
-    /**
-     * This is a _special_ resource that waits for ACM to complete validation via the DNS record
-     * checking for a status of "ISSUED" on the certificate itself. No actual resources are
-     * created (or updated or deleted).
-     */
-    const certificateValidation = new aws.acm.CertificateValidation("certificateValidation", {
-        certificateArn: certificate.arn,
-        validationRecordFqdns: [certificateValidationDomain.fqdn],
-    }, { provider: region });
-
-    certificateArn = certificateValidation.certificateArn;
-}
 
 // distributionArgs configures the CloudFront distribution. Relevant documentation:
 // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html
 // https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html
 const distributionArgs: aws.cloudfront.DistributionArgs = {
     enabled: true,
-    aliases: [config.targetDomain],
-
     // We only specify one origin for this distribution, the S3 content bucket.
     origins: [
         {
@@ -142,7 +97,7 @@ const distributionArgs: aws.cloudfront.DistributionArgs = {
         },
     ],
 
-    defaultRootObject: "index.html",
+    defaultRootObject: "server/index.html",
 
     // A CloudFront distribution can configure different cache behaviors based on the request path.
     // Here we just specify a single, default cache behavior which is just read-only requests to S3.
@@ -170,75 +125,36 @@ const distributionArgs: aws.cloudfront.DistributionArgs = {
     // You can customize error responses. When CloudFront receives an error from the origin (e.g. S3 or some other
     // web service) it can return a different error code, and return the response for a different resource.
     customErrorResponses: [
-        { errorCode: 404, responseCode: 404, responsePagePath: "/404.html" },
+        { errorCode: 404, responseCode: 404, responsePagePath: "/server/404.html" },
     ],
 
     restrictions: {
         geoRestriction: {
-            restrictionType: "none",
+            restrictionType: "whitelist",
+            locations: [
+                "US",
+                "CA",
+                "ES",
+                "DE",
+            ],
         },
     },
 
     viewerCertificate: {
-        acmCertificateArn: certificateArn,  // Per AWS, ACM certificate must be in the us-east-1 region.
-        sslSupportMethod: "sni-only",
+        cloudfrontDefaultCertificate: true
     },
 
     loggingConfig: {
         bucket: logsBucket.bucketDomainName,
-        includeCookies: false,
-        prefix: `${config.targetDomain}/`,
+        includeCookies: false
     },
 };
 
 const cdn = new aws.cloudfront.Distribution("cdn", distributionArgs);
 
-// Split a domain name into its subdomain and parent domain names.
-// e.g. "www.example.com" => "www", "example.com".
-function getDomainAndSubdomain(domain: string): { subdomain: string, parentDomain: string } {
-    const parts = domain.split(".");
-    if (parts.length < 2) {
-        throw new Error(`No TLD found on ${domain}`);
-    }
-    if (parts.length === 2) {
-        return { subdomain: "", parentDomain: domain };
-    }
-
-    const subdomain = parts[0];
-    parts.shift();  // Drop first element.
-    return {
-        subdomain,
-        // Trailing "." to canonicalize domain.
-        parentDomain: parts.join(".") + ".",
-    };
-}
-
-// Creates a new Route53 DNS record pointing the domain to the CloudFront distribution.
-function createAliasRecord(
-    targetDomain: string, distribution: aws.cloudfront.Distribution): aws.route53.Record {
-    const domainParts = getDomainAndSubdomain(targetDomain);
-    const hostedZoneId = aws.route53.getZone({ name: domainParts.parentDomain }, { async: true }).then(zone => zone.zoneId);
-    return new aws.route53.Record(
-        targetDomain,
-        {
-            name: domainParts.subdomain,
-            zoneId: hostedZoneId,
-            type: "A",
-            aliases: [
-                {
-                    name: distribution.domainName,
-                    zoneId: distribution.hostedZoneId,
-                    evaluateTargetHealth: true,
-                },
-            ],
-        });
-}
-
-const aRecord = createAliasRecord(config.targetDomain, cdn);
 
 // Export properties from this stack. This prints them at the end of `pulumi up` and
 // makes them easier to access from the pulumi.com.
 export const contentBucketUri = pulumi.interpolate`s3://${contentBucket.bucket}`;
 export const contentBucketWebsiteEndpoint = contentBucket.websiteEndpoint;
 export const cloudFrontDomain = cdn.domainName;
-export const targetDomainEndpoint = `https://${config.targetDomain}/`;

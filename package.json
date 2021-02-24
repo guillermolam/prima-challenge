@@ -6,7 +6,7 @@
   },
   "scripts": {
     "dev": "next",
-    "build": "tsc && next build",
+    "build": "tsc && next build && npm run export",
     "bootstrap": "cdk bootstrap aws://401280197872/eu-west-3",
     "watch": "tsc -w",
     "cdk": "cdk",
@@ -17,7 +17,8 @@
     "destroy-static": "npm run bootstrap && cdk destroy PrismaCapacitycStaticSite",
     "destroy-dynamic": "npm run bootstrap && cdk destroy PrismaCapacityDynamicSite",
     "synth": "cdk synth -v",
-    "start": "next start"
+    "start": "next start",
+    "export": "next export"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.90.1",
