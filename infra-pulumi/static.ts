@@ -1,18 +1,19 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as mime from 'mime'
-
 import * as fs from "fs";
 import * as path from "path";
+import * as props from "../cdk.json"
+
 
 // Load the Pulumi program configuration. These act as the "parameters" to the Pulumi program,
 // so that different Pulumi Stacks can be brought up using the same code.
 const stackConfig = new pulumi.Config("prisma-website");
 const config = {
     // pathToWebsiteContents is a relativepath to the website's contents.
-    pathToWebsiteContents: stackConfig.require("pathToWebsiteContents"),
+    pathToWebsiteContents: '../.next',
     // targetDomain is the domain/host to serve content at.
-    targetDomain: stackConfig.require("targetDomain"),
+    targetDomain: props.domain,
     // (Optional) ACM certificate ARN for the target domain; must be in the us-east-1 region. If omitted, an ACM certificate will be created.
     certificateArn: stackConfig.get("certificateArn"),
 };

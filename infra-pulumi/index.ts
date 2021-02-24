@@ -2,6 +2,7 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 import * as dotenv from "dotenv"
 
+const stackConfig = new pulumi.Config("prisma-website");
 const vpc = new aws.ec2.Vpc('vpc-59a45931', {
     cidrBlock: '10.0.0.0/16'
 });
@@ -43,10 +44,9 @@ const sshGroup = new aws.ec2.SecurityGroup('ssh-access', {
     ],
     vpcId: vpc.id
 });
-dotenv.config();
-const publicKey = process.env.SSH_KEY; // Substitute for your own SSH PUBLIC KEY
-if (!publicKey) throw new Error('Missing public key.');
-const key = new aws.ec2.KeyPair('key', { publicKey });
+
+const publicKey = stackConfig.requireSecret("publicKey");
+const key = new aws.ec2.KeyPair('key', {publicKey});
 
 const internetGroup = new aws.ec2.SecurityGroup('internet-access', {
     egress: [
