@@ -81,18 +81,22 @@ const ttl = 60 * 10;
 // https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html
 const distributionArgs: aws.cloudfront.DistributionArgs = {
     enabled: true,
+    webAclId: 'aws_wafv2_web_acl.prisma.arn',
     // We only specify one origin for this distribution, the S3 content bucket.
     origins: [
         {
             originId: contentBucket.arn,
             domainName: contentBucket.websiteEndpoint,
+            s3OriginConfig: {
+                originAccessIdentity: "origin-access-identity/cloudfront/ABCDEFG1234567",
+            },
             customOriginConfig: {
                 // Amazon S3 doesn't support HTTPS connections when using an S3 bucket configured as a website endpoint.
                 // https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-values-specify.html#DownloadDistValuesOriginProtocolPolicy
                 originProtocolPolicy: "http-only",
                 httpPort: 80,
                 httpsPort: 443,
-                originSslProtocols: ["TLSv1.2"],
+                originSslProtocols: ["TLSv1.2"]
             },
         },
     ],

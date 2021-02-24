@@ -19,6 +19,7 @@
     "cdk-synth": "cdk synth -v",
     "pulumi-deploy-static": "pulumi refresh -y && pulumi up -y -C ./infra-pulumi-static/",
     "pulumi-deploy-dynamic": "pulumi refresh -y && pulumi up -y -C ./infra-pulumi-dynamic/",
+    "pulumi-destroy": "pulumi destroy -y",
     "start": "next start",
     "export": "next export"
   },
