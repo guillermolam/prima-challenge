@@ -16,7 +16,7 @@
     "destroy": "cdk destroy --all",
     "destroy-static": "npm run bootstrap && cdk destroy PrismaCapacitycStaticSite",
     "destroy-dynamic": "npm run bootstrap && cdk destroy PrismaCapacityDynamicSite",
-    "synth": "cdk synth",
+    "synth": "cdk synth -v",
     "start": "next start"
   },
   "devDependencies": {
@@ -39,7 +39,12 @@
     "@aws-cdk/aws-s3": "^1.90.1",
     "@aws-cdk/aws-s3-deployment": "^1.90.1",
     "@aws-cdk/core": "^1.90.1",
+    "@pulumi/aws": "^3.30.0",
+    "@pulumi/awsx": "^0.24.0",
+    "@pulumi/pulumi": "^2.21.2",
     "axios": "^0.21.1",
+    "dotenv": "^8.2.0",
+    "mime": "^2.5.2",
     "next": "^10.0.7",
     "react": "^16.8.4",
     "react-dom": "^16.8.4"

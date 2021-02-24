@@ -18,8 +18,9 @@ export class StaticStack extends cdk.Stack {
         new cdk.CfnOutput(this, "Site", { value: "https://" + siteDomain });
 
         // Route53 DNS
-        const zone = route53.HostedZone.fromLookup(this, 'baseZone', {
-            domainName: props!.domain.siteSubDomain
+        // The name of the record  must match a custom domain name for your API, such as api.example.com.
+        const zone = new route53.PublicHostedZone(this, 'HostedZone', {
+            zoneName: props!.domain.domainName
         });
 
         //Add the Subdomain to Route53
@@ -28,7 +29,6 @@ export class StaticStack extends cdk.Stack {
             recordName: 'example',
             domainName: siteDomain
         });
-
 
         // S3 Content bucket
         const siteBucket = new s3.Bucket(this, "SiteBucket", {
