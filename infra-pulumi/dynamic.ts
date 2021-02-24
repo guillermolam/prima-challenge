@@ -72,7 +72,7 @@ const group = new aws.ec2.SecurityGroup("prisma-secgrp", {
 });
 
 const size = "t2.micro";     // t2.micro is available in the AWS free tier
-const server = new aws.ec2.Instance('my-server', {
+const server = new aws.ec2.Instance('prisma-webserver', {
     instanceType: size,
     ami: ami.id,
     subnetId: subnet.id,
@@ -80,7 +80,7 @@ const server = new aws.ec2.Instance('my-server', {
     keyName: key.keyName
 });
 
-const eip = new aws.ec2.Eip("my - server - eip", {
+const eip = new aws.ec2.Eip("prisma-server-eip", {
     instance: server.id,
     vpc: true
 });

@@ -2,7 +2,6 @@ import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
 
 import * as fs from "fs";
-import * as mime from "mime";
 import * as path from "path";
 
 // Load the Pulumi program configuration. These act as the "parameters" to the Pulumi program,
@@ -75,8 +74,7 @@ const logsBucket = new aws.s3.Bucket("requestLogs",
         acl: "private",
     });
 
-const tenMinutes = 60 * 10;
-
+const ttl = 60 * 10;
 let certificateArn: pulumi.Input<string> = config.certificateArn!;
 
 /**
@@ -103,7 +101,7 @@ if (config.certificateArn === undefined) {
         zoneId: hostedZoneId,
         type: certificate.domainValidationOptions[0].resourceRecordType,
         records: [certificate.domainValidationOptions[0].resourceRecordValue],
-        ttl: tenMinutes,
+        ttl: ttl,
     });
 
     /**
@@ -159,8 +157,8 @@ const distributionArgs: aws.cloudfront.DistributionArgs = {
         },
 
         minTtl: 0,
-        defaultTtl: tenMinutes,
-        maxTtl: tenMinutes,
+        defaultTtl: ttl,
+        maxTtl: ttl,
     },
 
     // "All" is the most broad distribution, and also the most expensive.
