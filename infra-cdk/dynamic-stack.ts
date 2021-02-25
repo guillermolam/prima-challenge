@@ -14,27 +14,17 @@ export class DynamicStack extends cdk.Stack {
     // create VPC w/ public and private subnets in 1 AZ
     // this also creates a NAT Gateway 
     // I am using 1 AZ because it's a demo.  In real life always use >=2
-    const vpc = new ec2.Vpc(this, 'vpc-59a45931', {
+    // an Internet Gateway is created by default whenever you create a public subnet.
+    const publicSubnectConfiguration = {
+      cidrMask: 16,
+      name: 'public-subnet',
+      subnetType: ec2.SubnetType.PUBLIC,
+    };
+    const vpc = new ec2.Vpc(this, 'prisma-vpc', {
       maxAzs: 1,
-      enableDnsHostnames: true,
       cidr: '10.0.0.0/16',
-      subnetConfiguration: [
-        {
-          cidrMask: 24,
-          name: 'ingress',
-          subnetType: ec2.SubnetType.PUBLIC,
-        },
-        {
-          cidrMask: 24,
-          name: 'application',
-          subnetType: ec2.SubnetType.PRIVATE,
-        },
-        {
-          cidrMask: 28,
-          name: 'rds',
-          subnetType: ec2.SubnetType.ISOLATED,
-        }
-      ]
+      subnetConfiguration: [publicSubnectConfiguration],
+      natGateways: 1
     });
 
     const securityGroup = new ec2.SecurityGroup(this, 'ssh-and-internet-access', {
@@ -48,14 +38,6 @@ export class DynamicStack extends cdk.Stack {
     securityGroup.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80), 'HTTP Egress');
     securityGroup.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443), 'HTTPS Egress');
 
-    // define the IAM role that will allow the EC2 instance to communicate with SSM 
-    const role = new Role(this, props!.role, {
-      assumedBy: new ServicePrincipal(siteDomain)
-    });
-    // arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-    role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'));
-
-
     // define a user data script to install & launch our web server 
     const ssmaUserData = UserData.forLinux();
     // make sure the latest SSM Agent is installed.
@@ -65,12 +47,17 @@ export class DynamicStack extends cdk.Stack {
     ssmaUserData.addCommands('yum install -y nginx', 'chkconfig nginx on', 'service nginx start');
 
     // launch an EC2 instance in the private subnet
-    const instance = new Ec2(this, 'NewsBlogInstance', {
-      image: new AmazonLinuxImage(),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
-      subnet: vpc.privateSubnets[0],
-      role: role,
-      userData: ssmaUserData
-    })
+    // define the IAM role that will allow the EC2 instance to communicate with SSM 
+
+    const instance = new ec2.CfnInstance(this, 'prisma-webserver', {
+      imageId: new AmazonLinuxImage().getImage(this).imageId,
+      instanceType: 't2.micro',
+      networkInterfaces: [
+        {
+          deviceIndex: "0",
+          subnetId: vpc.publicSubnets[0].subnetId
+        }
+      ]
+    });
   }
 }

@@ -10,7 +10,6 @@ export class Ec2InstanceProps {
   readonly instanceType: ec2.InstanceType;
   readonly userData: UserData;
   readonly subnet: ec2.ISubnet;
-  readonly role: Role;
 }
 
 export class Ec2 extends Resource {
@@ -18,11 +17,6 @@ export class Ec2 extends Resource {
     super(scope, id);
 
     if (props) {
-
-      //create a profile to attch the role to the instance
-      const profile = new CfnInstanceProfile(this, `${id}Profile`, {
-        roles: [props.role.roleName]
-      });
 
       // create the instance
       const instance = new ec2.CfnInstance(this, id, {
@@ -35,7 +29,6 @@ export class Ec2 extends Resource {
           }
         ]
         , userData: Fn.base64(props.userData.render())
-        , iamInstanceProfile: profile.ref
       });
 
       // tag the instance

@@ -5,7 +5,7 @@ import * as route53 from '@aws-cdk/aws-route53'
 import * as s3deploy from '@aws-cdk/aws-s3-deployment'
 import { StaticStackProps } from './multi-stack-definition';
 import * as path from 'path'
-import { ViewerProtocolPolicy } from '@aws-cdk/aws-cloudfront';
+import { OriginAccessIdentity, ViewerProtocolPolicy } from '@aws-cdk/aws-cloudfront';
 
 /** STATIC **/
 export class StaticStack extends cdk.Stack {
@@ -32,6 +32,9 @@ export class StaticStack extends cdk.Stack {
         new cdk.CfnOutput(this, "Bucket", { value: siteBucket.bucketName });
 
         // CloudFront distribution that provides HTTPS
+        const originAccessIdentity = new OriginAccessIdentity(this, 'B73396B1', {
+            comment: "Created by guillermo lam"
+        });
         const distribution = new cloudfront.CloudFrontWebDistribution(
             this,
             "SiteDistribution",
@@ -49,12 +52,17 @@ export class StaticStack extends cdk.Stack {
                 defaultRootObject: 'index.html',
                 originConfigs: [
                     {
-                        customOriginSource: {
-                            domainName: siteBucket.bucketWebsiteDomainName,
-                            originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
-                            httpPort: 80,
-                            httpsPort: 443
+                        s3OriginSource: {
+                            s3BucketSource: siteBucket,
+                            originAccessIdentity: originAccessIdentity,
+
                         },
+                        // customOriginSource: {
+                        //     domainName: siteBucket.bucketWebsiteDomainName,
+                        //     originProtocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+                        //     httpPort: 80,
+                        //     httpsPort: 443
+                        // },
                         behaviors: [{ isDefaultBehavior: true }],
                     },
                 ],
@@ -68,8 +76,8 @@ export class StaticStack extends cdk.Stack {
         new s3deploy.BucketDeployment(this, "DeployWithInvalidation", {
             sources: [s3deploy.Source.asset(path.resolve(__dirname, '../out'))],
             destinationBucket: siteBucket,
-           distribution,
-           distributionPaths: ["/*"],
+            distribution,
+            distributionPaths: ["/*"],
         });
     }
 }

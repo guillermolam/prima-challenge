@@ -88,7 +88,7 @@ const ami = pulumi.output(aws.getAmi({
 const userData = // <-- ADD THIS DEFINITION
     `#!/bin/bash
 echo "Hello, World!" > index.html
-nohup python -m SimpleHTTPServer 443 &`;
+nohup python -m SimpleHTTPServer 80 &`;
 
 const size = "t2.micro";     // t2.micro is available in the AWS free tier
 const server = new aws.ec2.Instance('prisma-webserver', {
