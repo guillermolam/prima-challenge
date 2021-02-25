@@ -13,7 +13,7 @@ COPY /out/ /usr/share/nginx/html
 COPY default.conf /etc/nginx/conf.d/default.conf
 
 
-EXPOSE 80/tcp 444/tcp
+EXPOSE 80 443
 
 VOLUME /etc/letsencrypt
 VOLUME /var/www/certbot

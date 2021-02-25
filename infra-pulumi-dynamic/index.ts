@@ -1,5 +1,6 @@
 import * as aws from "@pulumi/aws";
 import * as pulumi from "@pulumi/pulumi";
+import * as fs from "fs";
 
 const stackConfig = new pulumi.Config("prisma-website");
 const vpc = new aws.ec2.Vpc('vpc-59a45931', {
@@ -38,8 +39,6 @@ const publicRouteTableAssociation = new aws.ec2.RouteTableAssociation(
     }
 );
 
-
-
 const publicKey = stackConfig.requireSecret("publicKey");
 const key = new aws.ec2.KeyPair('key', {
     keyName: "keypair-pulumi",
@@ -61,7 +60,7 @@ const internetGroup = new aws.ec2.SecurityGroup('internet-access', {
         { protocol: 'tcp', fromPort: 80, toPort: 80, cidrBlocks: ['0.0.0.0/0'] }
     ],
     egress: [
-        { protocol: 'tcp', fromPort: 80, toPort: 80, cidrBlocks: ['0.0.0.0/0'] }
+        { protocol: '-1', fromPort: 0, toPort: 0, cidrBlocks: ['0.0.0.0/0'] }
     ],
     vpcId: vpc.id
 });
@@ -70,48 +69,36 @@ const tlsGroup = new aws.ec2.SecurityGroup('tls-access', {
     ingress: [
         { protocol: 'tcp', fromPort: 443, toPort: 443, cidrBlocks: ['0.0.0.0/0'] }
     ],
-    egress: [
-        { protocol: 'tcp', fromPort: 443, toPort: 443, cidrBlocks: ['0.0.0.0/0'] }
-    ],
     vpcId: vpc.id
 });
 
-const ami = pulumi.output(aws.getAmi({
-    filters: [{
-        name: "name",
-        values: ["amzn-ami-hvm-*"],
-    }],
-    owners: ["137112412989"], // This owner ID is Amazon
+const amiprisma = pulumi.output(aws.getAmi({
     mostRecent: true,
+    filters: [
+        {
+            name: "name",
+            values: ["prisma-webserver-ami"],
+        },
+        {
+            name: "virtualization-type",
+            values: ["hvm"],
+        },
+    ],
+    owners: ["401280197872"],
 }));
-
-const userData =
-    `#!/bin/bash
-    #perform a quick update on your instance:
-    sudo yum update -y
-     
-    #install docker
-    sudo amazon-linux-extras install docker
-
-    #start docker
-    sudo service docker start
-
-    #pull and run container
-    docker pull guillermolam/prisma-nginx
-
-    docker run --name prisma-nginx -d -p 8080:80 guillermolam/prisma-nginx
-    certbot --nginx -d guillermolammartin.com -d www.guillermolammartin.com
-    #docker run -v $(pwd)/letsencrypt:/etc/letsencrypt --name prisma-nginx -ti -p 8080:80 nginx-certbot sh`;
 
 const size = "t2.micro";     // t2.micro is available in the AWS free tier
 const server = new aws.ec2.Instance('prisma-webserver', {
     instanceType: size,
-    ami: ami.id,
+    ami: amiprisma.id,
     subnetId: subnet.id,
     vpcSecurityGroupIds: [sshGroup.id, internetGroup.id, tlsGroup.id],
     keyName: key.keyName,
-    userData: userData,
-    associatePublicIpAddress: true
+    associatePublicIpAddress: true,
+    userData: fs.readFileSync("provision-amzn.sh", "utf-8"),
+    tags: {
+        Name: "prisma-webserver",
+    },
 });
 
 const eip = new aws.ec2.Eip("prisma-server-eip", {
