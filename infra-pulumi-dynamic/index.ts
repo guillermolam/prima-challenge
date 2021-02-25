@@ -85,10 +85,23 @@ const ami = pulumi.output(aws.getAmi({
     mostRecent: true,
 }));
 
-const userData = // <-- ADD THIS DEFINITION
+const userData =
     `#!/bin/bash
-echo "Hello, World!" > index.html
-nohup python -m SimpleHTTPServer 80 &`;
+    #perform a quick update on your instance:
+    sudo yum update -y
+     
+    #install docker
+    sudo amazon-linux-extras install docker
+
+    #start docker
+    sudo service docker start
+
+    #pull and run container
+    docker pull guillermolam/prisma-nginx
+
+    docker run --name prisma-nginx -d -p 8080:80 guillermolam/prisma-nginx
+    certbot --nginx -d guillermolammartin.com -d www.guillermolammartin.com
+    #docker run -v $(pwd)/letsencrypt:/etc/letsencrypt --name prisma-nginx -ti -p 8080:80 nginx-certbot sh`;
 
 const size = "t2.micro";     // t2.micro is available in the AWS free tier
 const server = new aws.ec2.Instance('prisma-webserver', {
@@ -105,7 +118,6 @@ const eip = new aws.ec2.Eip("prisma-server-eip", {
     instance: server.id,
     vpc: true
 });
-
 
 export const publicIp = server.publicIp;
 export const publicHostName = server.publicDns;
