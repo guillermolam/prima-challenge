@@ -6,7 +6,7 @@
   },
   "scripts": {
     "dev": "next",
-    "build": "tsc && next build && npm run export",
+    "build": "tsc && next build && npm run export && ./docker-build.sh",
     "bootstrap": "cdk bootstrap aws://401280197872/eu-west-3",
     "watch": "tsc -w",
     "cdk": "cdk",
