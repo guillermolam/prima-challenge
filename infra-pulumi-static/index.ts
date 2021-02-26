@@ -136,8 +136,6 @@ const distributionArgs: aws.cloudfront.DistributionArgs = {
         geoRestriction: {
             restrictionType: "whitelist",
             locations: [
-                "US",
-                "CA",
                 "ES",
                 "DE",
             ],
