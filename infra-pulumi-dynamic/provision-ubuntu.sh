@@ -58,7 +58,5 @@ systemctl enable docker-container@ecs-agent.service
 systemctl start docker-container@ecs-agent.service
 
 #pull and run container
-docker pull guillermolam/prisma-nginx:latest
-
-docker run --name prisma-webserver -v $(pwd)/letsencrypt:/etc/letsencrypt -d -p 80:80 -p 443:443 guillermolam/prisma-nginx:latest
-#certbot --nginx -d guillermolammartin.com -d www.guillermolammartin.com
+docker pull guillermolam/prisma-webserver:latest
+docker run --name prisma-webserver --restart unless-stopped -d -p 80:80 -p 443:443 guillermolam/prisma-webserver:latest
